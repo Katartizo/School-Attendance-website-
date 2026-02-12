@@ -1,18 +1,14 @@
 // ==========================================
-// 1. CONFIGURATION (YOU MUST CHANGE THIS)
+// 1. CONFIGURATION
 // ==========================================
 
+// YOUR CURRENT COORDINATES (Oyo)
 const CLASS_LAT = 7.84312; 
 const CLASS_LON = 3.93675;
 
-// Set the radius to 50 meters for testing (since GPS can jump around a bit)
-const ALLOWED_RADIUS = 50;
-
-
-
-
-// The maximum distance allowed in meters (e.g., 20 meters)
-const ALLOWED_RADIUS = 20; 
+// Allowed radius in meters
+// We use 50m to be safe because phone GPS can be jumpy
+const ALLOWED_RADIUS = 50; 
 
 // ==========================================
 // 2. THE LOGIC
@@ -24,7 +20,7 @@ const formContainer = document.getElementById('google-form-container');
 function checkLocation() {
     // 1. Show loading message
     statusEl.className = 'loading';
-    statusEl.innerText = "Checking GPS... Please wait.";
+    statusEl.innerText = "Checking GPS... Please wait up to 10 seconds.";
 
     // 2. Check if browser supports Geolocation
     if (!navigator.geolocation) {
@@ -35,7 +31,7 @@ function checkLocation() {
     // 3. Request the position
     navigator.geolocation.getCurrentPosition(success, error, {
         enableHighAccuracy: true, // Use GPS (more battery, better accuracy)
-        timeout: 30000,           // Wait 30 seconds max
+        timeout: 10000,           // Wait 10 seconds max
         maximumAge: 0             // Do not use cached location
     });
 }
@@ -58,10 +54,31 @@ function success(position) {
     }
 }
 
-// If there is an error getting location:
+// ------------------------------------------
+// UPDATED ERROR HANDLER (TELLS YOU THE REASON)
+// ------------------------------------------
 function error(err) {
-    console.warn(`ERROR(${err.code}): ${err.message}`);
-    showError("Unable to retrieve location. Please allow GPS access.");
+    let errorMessage = "";
+    
+    // Check the specific error code from the browser
+    switch(err.code) {
+        case 1: // PERMISSION_DENIED
+            errorMessage = "🔒 BLOCKED: You denied Location access. Reset permissions by clicking the Lock icon in the address bar.";
+            break;
+        case 2: // POSITION_UNAVAILABLE
+            errorMessage = "📡 GPS FAILED: Your device can't find a signal. Go outside or turn on Wi-Fi.";
+            break;
+        case 3: // TIMEOUT
+            errorMessage = "⏳ TIMEOUT: Your phone took too long to answer. Try again.";
+            break;
+        default:
+            errorMessage = "❌ Unknown error: " + err.message;
+    }
+
+    // Show the detailed message on screen
+    statusEl.innerHTML = `<span class='error'>${errorMessage}</span>`;
+    statusEl.className = 'error';
+    console.warn(errorMessage);
 }
 
 // Helper function to update the status text (Green)
@@ -73,13 +90,12 @@ function showSuccess(msg) {
 // Helper function to update the status text (Red)
 function showError(msg) {
     statusEl.className = 'error';
-    statusEl.innerText = msg;
+    statusEl.innerHTML = msg; 
 }
 
 // ==========================================
 // 3. THE MATH (Haversine Formula)
 // ==========================================
-// This calculates the distance between two GPS points in meters
 function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Radius of the earth in meters
     const dLat = deg2rad(lat2 - lat1);
