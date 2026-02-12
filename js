@@ -3,8 +3,11 @@
 // ==========================================
 
 // YOUR CURRENT COORDINATES (Oyo)
+
 const CLASS_LAT = 7.84312; 
 const CLASS_LON = 3.93675;
+
+
 
 // Allowed radius in meters
 // We use 50m to be safe because phone GPS can be jumpy
