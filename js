@@ -35,7 +35,7 @@ function checkLocation() {
     // 3. Request the position
     navigator.geolocation.getCurrentPosition(success, error, {
         enableHighAccuracy: true, // Use GPS (more battery, better accuracy)
-        timeout: 10000,           // Wait 10 seconds max
+        timeout: 30000,           // Wait 30 seconds max
         maximumAge: 0             // Do not use cached location
     });
 }
