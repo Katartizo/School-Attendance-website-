@@ -2,10 +2,14 @@
 // 1. CONFIGURATION (YOU MUST CHANGE THIS)
 // ==========================================
 
-// REPLCE THESE NUMBERS with your classroom's coordinates
-// You can get these from Google Maps (Right-click location)
-const CLASS_LAT = 6.5244;  
-const CLASS_LON = 3.3792; 
+const CLASS_LAT = 7.84312; 
+const CLASS_LON = 3.93675;
+
+// Set the radius to 50 meters for testing (since GPS can jump around a bit)
+const ALLOWED_RADIUS = 50;
+
+
+
 
 // The maximum distance allowed in meters (e.g., 20 meters)
 const ALLOWED_RADIUS = 20; 
