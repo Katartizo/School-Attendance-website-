@@ -4,8 +4,8 @@
 
 // YOUR CURRENT COORDINATES (Oyo)
 
-const CLASS_LAT = 7.799338; 
-const CLASS_LON = 3.910490;
+const CLASS_LAT = 7.84312; 
+const CLASS_LON = 3.93675;
 
 
 
