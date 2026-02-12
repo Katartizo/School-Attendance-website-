@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Attendance Check</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        #status-message {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .loading { background-color: #e2e3e5; color: #383d41; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        
+        /* Hide the Google Form by default */
+        #google-form-container {
+            display: none; 
+            margin-top: 20px;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 600px; /* Adjust height based on your form length */
+            border: none;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Physics 101 Attendance</h1>
+        <p>Click the button below to verify your location.</p>
+        
+        <button onclick="checkLocation()">Verify My Location</button>
+
+        <div id="status-message"></div>
+
+        <div id="google-form-container">
+            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdExampleFormID/viewform?embedded=true" width="640" height="640" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+            
+            </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // 1. Set your Classroom Coordinates (Lat/Lon)
+        // You can get these from Google Maps (Right click a location)
+        const CLASS_LAT = 6.5244; 
+        const CLASS_LON = 3.3792; 
+        
+        // 2. Set allowed distance in meters (e.g., 20m inside the room)
+        const ALLOWED_RADIUS = 30; 
+        // ---------------------
+
+        const statusEl = document.getElementById('status-message');
+        const formContainer = document.getElementById('google-form-container');
+
+        function checkLocation() {
+            statusEl.className = 'loading';
+            statusEl.innerText = "Checking GPS... Please allow location access.";
+
+            if (!navigator.geolocation) {
+                showError("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(success, error, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        }
+
+        function success(position) {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+            const distance = getDistance(CLASS_LAT, CLASS_LON, userLat, userLon);
+
+            if (distance <= ALLOWED_RADIUS) {
+                showSuccess(`Success! You are in class (${Math.round(distance)}m away).`);
+                formContainer.style.display = "block"; // REVEAL THE FORM
+            } else {
+                showError(`Access Denied. You are ${Math.round(distance)}m away. You must be within ${ALLOWED_RADIUS}m.`);
+                formContainer.style.display = "none";
+            }
+        }
+
+        function error(err) {
+            console.warn(`ERROR(${err.code}): ${err.message}`);
+            showError("Unable to retrieve location. Please ensure GPS is on and you allowed access.");
+        }
+
+        function showSuccess(msg) {
+            statusEl.className = 'success';
+            statusEl.innerText = msg;
+        }
+
+        function showError(msg) {
+            statusEl.className = 'error';
+            statusEl.innerText = msg;
+        }
+
+        // Haversine Formula to calculate distance in meters
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth radius in meters
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI/180);
+        }
+    </script>
+</body>
+</html>
